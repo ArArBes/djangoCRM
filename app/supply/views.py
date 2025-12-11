@@ -30,7 +30,7 @@ class SuplierIdView(APIView):
         except Supplier.DoesNotExist:
             return Response(
                 {"detail": f"Поставщик с индексом {pk} не найден"},
-                status=status.HTTP_404_BAD_REQUEST
+                status=status.HTTP_400_BAD_REQUEST
             )
 
         supplier_serializer = self.serializer_class(supplier)
@@ -155,14 +155,18 @@ class SupplyCreateView(APIView):
             storage = company.storage
             for product_data in data['products']:
                 product = Product.objects.get(id=product_data['product_id'], storage=storage)
+                if product_data['quantity'] <= 0:
+                    return Response({"detail": f"Указано отрицательное количество товара {product.title}"},
+                                    status=status.HTTP_400_BAD_REQUEST)
                 product.quantity += product_data['quantity']
+                product.purchase_price = product_data['purchase_price']
                 product.sale_price = Decimal(product_data['purchase_price']) * Decimal('1.33')
                 product.save()
-            SupplyProduct.objects.create(
-                supply=supply,
-                product=product,
-                quantity=product_data['quantity']
-            )
+                SupplyProduct.objects.create(
+                    supply=supply,
+                    product=product,
+                    quantity=product_data['quantity']
+                )
             return Response(SupplyCreateSerializer(supply).data, status=201)
         except Supplier.DoesNotExist:
             return Response({"detail": "Поставщик не найден"}, status=status.HTTP_400_BAD_REQUEST
@@ -170,14 +174,11 @@ class SupplyCreateView(APIView):
 
         except Product.DoesNotExist:
             if supply: supply.delete()
-            return Response({"detail": f"Товар {product_data['id']} не найден"}, status=status.HTTP_400_BAD_REQUEST
+            return Response({"detail": f"Товар {product_data['product_id']} не найден"},
+                            status=status.HTTP_400_BAD_REQUEST
                             )
         except KeyError:
             return Response({"detail": 'Неверный формат данных'}, status=status.HTTP_400_BAD_REQUEST)
-
-
-class SupplyProductView(APIView):
-    permission_classes = [IsAuthenticated]
 
 
 class ProductIdView(APIView):
