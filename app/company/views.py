@@ -39,6 +39,7 @@ class CompanyViewSet(APIView):
 
 class CompanyIdViewSet(APIView):
     permission_classes = [IsAuthenticated]
+    serializer_class = CompanySerializer
     def get(self, request, *args, **kwargs):
         company_id = kwargs.get('company_id')
 
@@ -206,6 +207,7 @@ class EmployeesViewSet(APIView):
 
 class EmployeeViewSetDelete(APIView):
     permission_classes = [IsCompanyOwner]
+    serializer_class = EmployeeSerializer
     def delete(self, request, *args, **kwargs):
         user = request.user
 
