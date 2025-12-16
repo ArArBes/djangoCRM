@@ -45,6 +45,7 @@ INSTALLED_APPS = [
     'rest_framework_simplejwt',
     'company.apps.CompanyConfig',
     'supply.apps.SupplyConfig',
+    'sale.apps.SaleConfig',
 ]
 
 MIDDLEWARE = [
@@ -134,7 +135,8 @@ REST_FRAMEWORK = {
     'DEFAULT_SCHEMA_CLASS': 'drf_spectacular.openapi.AutoSchema',
     'DEFAULT_AUTHENTICATION_CLASSES': (
         'rest_framework_simplejwt.authentication.JWTAuthentication',
-    )
+    ),
+    'PAGE_SIZE': 10
 }
 
 SIMPLE_JWT = {
